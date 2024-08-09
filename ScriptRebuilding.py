@@ -35,7 +35,7 @@ class ScriptRebuilding:
                 file.write(", ")
         file.write(")\n")
         if not return_value.is_empty and return_value.kind != "game":
-            write_content = f"output.write(f\"{self.time} {return_value.name} " + \
+            write_content = f"output.write(f\"{function.time} {return_value.name} " + \
                             "{" + \
                             f"{return_value.name}" + \
                             "}\\n\")\n"
