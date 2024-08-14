@@ -1,4 +1,5 @@
 Ajouter sur les fonctions Input les variables impactées
+Définir une opération par variable
 
 Terminer de créer Game
 

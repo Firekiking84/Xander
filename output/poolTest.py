@@ -1,4 +1,4 @@
-from Morpion import Morpion
+from Games.Morpion import Morpion
 
 output = open("output.txt", "w+")
 game = Morpion()

@@ -1,9 +1,9 @@
 import subprocess
 import ast
 
-from Game import Game
+from Class.Game import Game
 from ScriptRebuilding import ScriptRebuilding
-from FunctionEnum import *
+from Class.FunctionEnum import *
 
 
 def get_functions_by_type(parsed_file, value1, value2=FunctionKind.INOUT.value):
@@ -138,6 +138,47 @@ def uniform_function_operation(input_functions):
     #  On récupère l'opération majoritaire et on l'applique partout
     for single_function in single_functions:
         apply_main_operation(single_function, input_functions, get_main_operation(single_function, input_functions))
+        
+
+def get_a_getter(output_functions, target_time):
+    for output_function in output_functions:
+        if output_function.time == target_time and output_function.kind == FunctionKind.OUTPUT.value:
+            return output_function
+    return False
+
+
+def get_the_getter(output_functions, target_time, var_name):
+    output_function = get_a_getter(output_functions, target_time)
+    while output_function:
+        if output_function.return_value.name == var_name:
+            return output_function
+        target_time -= 1
+        output_function = get_a_getter(output_functions, target_time)
+    return False
+
+
+def get_prev_value(output_functions, input_function, var_name):
+    output_function = get_the_getter(output_functions, input_function.time - 1, var_name)
+    if not output_function:
+        return False
+    return get_output_value(output_functions, output_function.time)
+
+def get_next_prev_value(next_prev_value, input_function, output_functions, output_lines):
+    if next_prev_value["n_var"] == 0 and input_function.kind == FunctionKind.INOUT.value:
+        var_name = input_function.return_value.name
+        next_prev_value["next"] = get_output_value(output_lines, input_function.time)
+        next_prev_value["prev"] = get_prev_value(output_functions, input_function, var_name)
+    else:
+        if next_prev_value["n_var"] == 0:
+            next_prev_value["n_var"] += 1
+        output_function = get_a_getter(output_functions, input_function.time + next_prev_value["n_var"])
+        if not output_function:
+            return False
+        var_name = output_function.return_value.name
+        next_prev_value["next"] = get_output_value(output_functions, output_function.time)
+        next_prev_value["prev"] = get_prev_value(output_functions, input_function, var_name)
+    next_prev_value["n_var"] += 1
+    return True
 
 
 def define_function_operation(parsed_file, output_file):
@@ -145,32 +186,27 @@ def define_function_operation(parsed_file, output_file):
     output_lines = file.readlines()
     output_functions = get_functions_by_type(parsed_file, FunctionKind.OUTPUT.value)
     input_functions = get_functions_by_type(parsed_file, FunctionKind.INPUT.value)
-    index_output_functions = 0
+    index_input_functions = 0
     for input_function in input_functions:
-        next_value = get_output_value(output_lines, input_function.time)
-        while index_output_functions < len(output_functions) and output_functions[
-            index_output_functions].time < input_function.time:
-            index_output_functions += 1
-        if index_output_functions == len(output_functions):
-            raise Exception("Error in the output file, no value before operation !")
-        output_function = output_functions[index_output_functions]
-        prev = get_output_value(output_lines, output_function.time)
-        # Maintenant qu'on a avant après. On teste les différentes possibilités d'interaction
-        # Possibilités d'interactions codés en dur. Pas forcément ouf pour la suite
         is_operation_find = False
-        if type(prev) == type([]) and len(input_function.parameters) == 1:
-            is_operation_find = test_operation_single_target_index(prev, next_value, input_function)
+        next_prev_value = {"n_var": 0, "next": None, "prev": None}
+        while not get_next_prev_value(next_prev_value, input_function, output_functions, output_lines):
+            # Maintenant qu'on a avant après. On teste les différentes possibilités d'interaction
+            # Possibilités d'interactions codés en dur. Pas forcément ouf pour la suite
+            if type(next_prev_value["prev"]) == type([]) and len(input_function.parameters) == 1:
+                is_operation_find = test_operation_single_target_index(next_prev_value["prev"], next_prev_value["next"], input_function)
+                if not is_operation_find:
+                    is_operation_find = test_operation_single_target_name(next_prev_value["prev"], next_prev_value["next"], input_function)
+            elif type(next_prev_value["prev"]) == type([]) and len(input_function.parameters) == 2:
+                is_operation_find = test_operation_src_dest_target_index(next_prev_value["prev"], next_prev_value["next"], input_function)
+                if not is_operation_find:
+                    is_operation_find = test_operation_src_dest_target_name(next_prev_value["prev"], next_prev_value["next"], input_function)
+            if not is_operation_find and type(next_prev_value["prev"]) == type(0) and len(input_function.parameters) == 1:
+                is_operation_find = test_operation_quantity(next_prev_value["prev"], next_prev_value["next"], input_function)
             if not is_operation_find:
-                is_operation_find = test_operation_single_target_name(prev, next_value, input_function)
-        elif type(prev) == type([]) and len(input_function.parameters) == 2:
-            is_operation_find = test_operation_src_dest_target_index(prev, next_value, input_function)
-            if not is_operation_find:
-                is_operation_find = test_operation_src_dest_target_name(prev, next_value, input_function)
-        if not is_operation_find and type(prev) == type(0) and len(input_function.parameters) == 1:
-            is_operation_find = test_operation_quantity(prev, next_value, input_function)
-        if not is_operation_find:
-            input_function.operation = FunctionOperation.UNKNOWN.value
-            print("Mode d'entrée inconnu !")
+                input_function.operation = FunctionOperation.UNKNOWN.value
+                print("Mode d'entrée inconnu !")
+        index_input_functions += 1
     # Possibilité de définitions différentes pour des mêmes fonctions à cause de colision possible
     # Surtout sur Quantity_*
     # Alors on lisse tout
@@ -180,7 +216,7 @@ def define_function_operation(parsed_file, output_file):
 
 def proceed_parsed_result(parsed_file):
     pool_test = "poolTest.py"
-    output_file = "output.txt"
+    output_file = "../output/output.txt"
     ScriptRebuilding(parsed_file, pool_test, output_file)
     subprocess.run(["python", pool_test])
     define_function_operation(parsed_file, output_file)
