@@ -5,6 +5,9 @@ from Morpion import Morpion
 game = Morpion()  # game
 board = game.init_board()  # array 9
 
+# back
+board = game.back()  # array 9
+
 # player X
 board = game.get_board()  # array 9
 board = game.play_morpion(4)  # array 9

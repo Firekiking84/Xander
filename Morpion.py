@@ -2,6 +2,7 @@ class Morpion:
     def __init__(self):
         self.player = "X"
         self.board = []
+        self.previous_board = []
 
     def check_win(self):
         row = True
@@ -51,14 +52,17 @@ class Morpion:
 
     def init_board(self):
         self.board = []
+        self.previous_board = []
         for i in range(9):
             self.board.append(f"{i}")
+        self.previous_board.append(self.board.copy())
         return self.board
 
     def play_morpion(self, move):
         if move < 0 or move > len(self.board):
             return False
         if '0' <= self.board[move] <= '9':
+            self.previous_board.append(self.board.copy())
             self.board[move] = self.player
         else:
             return False
@@ -69,4 +73,11 @@ class Morpion:
             self.player = 'O'
         else:
             self.player = 'X'
+        return self.board
+
+    def back(self):
+        if len(self.previous_board) > 0:
+            self.board = self.previous_board.pop()
+        else:
+            self.board = []
         return self.board

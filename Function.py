@@ -21,7 +21,6 @@ class Function:
                 self.kind = FunctionKind.OUTPUT.value
             else:
                 self.kind = FunctionKind.NONE.value
-        self.operation = operation
 
     def __cmp__(self, other):
         if self.name == other.name:

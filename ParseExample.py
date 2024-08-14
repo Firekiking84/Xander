@@ -17,6 +17,8 @@ class ParseExample:
             return "bool"
         elif "game" in word:
             return "game"
+        elif "back" in word:
+            return "back"
         else:
             raise Exception(f"Error in the example file ! Unknow Type only 'array', 'string' and 'integer' not {word}")
 
@@ -76,6 +78,8 @@ class ParseExample:
                     new_function = Function(function_name, function_return_value, function_parameters, function_time)
                     if mode == -2:
                         self.init_functions.append(new_function)
+                    elif mode == -3:
+                        self.back_function = new_function
                     else:
                         self.players[mode].functions_used.append(new_function)
                     function_parameters = []
@@ -113,6 +117,7 @@ class ParseExample:
         self.imports = []
         self.variables = []
         self.init_functions = []
+        self.back_function = None
         self.players = {}
         self.players_name = []
         self.winner = ""
@@ -128,15 +133,18 @@ class ParseExample:
                     mode = -1
                 elif "# init" in line:
                     mode = -2
+                elif "# back" in line:
+                    mode = -3
                 elif "# end" in line:
                     self.winner = line[len("# end ")]
                 elif "# player" in line:
                     mode = line[len("# player "):].strip()
             elif line[0] != '\n':
-                if mode == -1:
-                    self.imports.append(line)
-                elif mode == -2:
-                    self.parse_line(line, mode)
+                if type(mode) == type(1):
+                    if mode == -1:
+                        self.imports.append(line)
+                    elif mode <= -2:
+                        self.parse_line(line, mode)
                 else:
                     if mode not in self.players:
                         self.players[mode] = Player(mode)

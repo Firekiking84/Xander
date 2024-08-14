@@ -1,4 +1,5 @@
-Faire le tri dans player pour ne garder que les fonctions nécessaires. De façon à avoir des "outils", pour la
-construction du joueur après
+Ajouter sur les fonctions Input les variables impactées
+
+Terminer de créer Game
 
 Ensuite, trouver un moyen de déterminer les conditions de victoire
