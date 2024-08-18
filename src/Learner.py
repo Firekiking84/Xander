@@ -1,4 +1,4 @@
-from ParseExample import ParseExample
+from Class.ParseExample import ParseExample
 from Proceed_parsed_result import proceed_parsed_result
 from src.Build_player import build_player
 
@@ -11,4 +11,4 @@ def learner(example_file, player_name):
     build_player(game, player_name)
 
 
-learner("../res/exampleMorpion.py", "morpionPlayer")
+learner("res/exampleMorpion.py", "morpionPlayer")

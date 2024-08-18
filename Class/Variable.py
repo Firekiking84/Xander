@@ -1,5 +1,9 @@
 class Variable:
-    def __init__(self, kind="", size=0, name=""):
+    def __init__(self, kind="", size=0, name="", getters=None, setters=None):
+        if getters is None:
+            getters = []
+        if setters is None:
+            setters = []
         self.kind = kind
         self.size = size
         self.name = name
@@ -7,6 +11,8 @@ class Variable:
             self.is_empty = True
         else:
             self.is_empty = False
+        self.getters = getters
+        self.setters = setters
 
     def __cmp__(self, other):
         if self.name == other.name:

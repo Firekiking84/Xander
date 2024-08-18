@@ -1,6 +1,9 @@
 Ajouter sur les fonctions Input les variables impactées
 Définir une opération par variable
 
+Refaire uniform_function_operation pour que ça marche pour le tableau
+tout en faisant attention à uniformiser les mêmes opérations
+
 Terminer de créer Game
 
 Ensuite, trouver un moyen de déterminer les conditions de victoire

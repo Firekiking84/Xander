@@ -80,6 +80,8 @@ class ParseExample:
                         self.init_functions.append(new_function)
                     elif mode == -3:
                         self.back_function = new_function
+                        self.back_function.time = 0
+                        self.time -= 1
                     else:
                         self.players[mode].functions_used.append(new_function)
                     function_parameters = []

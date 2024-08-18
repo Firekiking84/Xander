@@ -1,5 +1,4 @@
-from Variable import Variable
-from FunctionEnum import FunctionKind
+from Class.FunctionEnum import FunctionKind
 
 
 class Function:
