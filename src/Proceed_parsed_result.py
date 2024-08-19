@@ -262,7 +262,7 @@ def define_function_operation(parsed_file, output_file):
 
 
 def proceed_parsed_result(parsed_file):
-    pool_test = "poolTest.py"
+    pool_test = "output/poolTest.py"
     output_file = "output.txt"
     ScriptRebuilding(parsed_file, pool_test, output_file)
     subprocess.run(["python", pool_test])
