@@ -1,11 +1,12 @@
+import time
 from curses.ascii import isdigit
 
 from Games.Coords import Coords
-from Games.mainMorpion import board
 
 
 class Morpion:
     def __init__(self):
+        self.nb_turn = 0
         self.player = "X"
         self.board = []
         self.previous_board = []
@@ -22,7 +23,7 @@ class Morpion:
 
 
     @staticmethod
-    def check_straight_lines_win(self, board, axe):
+    def check_straight_lines_win(self, gameboard, axe):
         line = {"ally": 0, "ennemy": 0}
         coords = Coords()
         for y in range(3):
@@ -31,7 +32,7 @@ class Morpion:
                     coords.set(x=x, y=y)
                 else:
                     coords.set(x=y, y=x)
-                self.manage_encounter(board[coords.i], line)
+                self.manage_encounter(gameboard[coords.i], line)
             if line["ally"] == 3 or line["ennemy"] == 3:
                 return True
             line["ally"] = 0
@@ -40,7 +41,7 @@ class Morpion:
 
 
     @staticmethod
-    def check_diagonal_lines_win(self, board, axe):
+    def check_diagonal_lines_win(self, gameboard, axe):
         line = {"ally": 0, "ennemy": 0}
         coords = Coords()
         if axe == "up":
@@ -48,8 +49,11 @@ class Morpion:
         else:
             check_range = range(2, -1, -1)
         for i in check_range:
-            coords.set(x=i, y=i)
-            self.manage_encounter(board[coords.i], line)
+            if axe == "down":
+                coords.set(x=2 - i, y=i)
+            else:
+                coords.set(x=i, y=i)
+            self.manage_encounter(gameboard[coords.i], line)
         if line["ally"] == 3 or line["ennemy"] == 3:
             return True
         return False
@@ -79,16 +83,37 @@ class Morpion:
 
     def get_board(self):
         if self.player == 'W' or self.player == 'D':
-            self.init_board()
-        return self.board
+            self.init_game()
+        return self.board.copy()
 
-    def init_board(self):
+    def set_board(self, new_board):
+        self.board = new_board.copy()
+        nb_X = 0
+        nb_O = 0
+        for slot in self.board:
+            if slot == 'X':
+                nb_X += 1
+            elif slot == 'O':
+                nb_O += 1
+        if nb_O < nb_X:
+            self.player = 'O'
+        else:
+            self.player = 'X'
+        self.nb_turn = nb_X + nb_O
+        return self.check_win()
+
+    def init_game(self):
         self.board = []
         self.previous_board = []
+        self.nb_turn = 0
         for i in range(9):
             self.board.append(f"{i}")
         self.previous_board.append(self.board.copy())
-        return self.board
+        if (int(time.time()) % 2) == 0:
+            self.player = 'X'
+        else:
+            self.player = 'O'
+        return self.board.copy()
 
 
     @staticmethod
@@ -110,13 +135,14 @@ class Morpion:
         if self.check_win():
             self.player = 'W'
             return True
-        if self.check_draw(board):
+        if self.check_draw(self.board):
             self.player = 'D'
             return True
         if self.player == 'X':
             self.player = 'O'
         else:
             self.player = 'X'
+        self.nb_turn += 1
         return self.board
 
     def back(self):
