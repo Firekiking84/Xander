@@ -1,44 +1,71 @@
+from curses.ascii import isdigit
+
+from Games.Coords import Coords
+from Games.mainMorpion import board
+
+
 class Morpion:
     def __init__(self):
         self.player = "X"
         self.board = []
         self.previous_board = []
 
-    def check_win(self):
-        row = True
-        i = 0
-        x = 0
-        while x < 3:
-            y = 0
-            while y < 3 and row:
-                if self.board[i] != self.player:
-                    row = False
-                i += 1
-                y += 1
-            if row:
+
+    @staticmethod
+    def manage_encounter(slot, line):
+        if isdigit(slot):
+            return
+        if slot == 'X':
+            line["ally"] += 1
+        else:
+            line["ennemy"] += 1
+
+
+    @staticmethod
+    def check_straight_lines_win(self, board, axe):
+        line = {"ally": 0, "ennemy": 0}
+        coords = Coords()
+        for y in range(3):
+            for x in range(3):
+                if axe == "x":
+                    coords.set(x=x, y=y)
+                else:
+                    coords.set(x=y, y=x)
+                self.manage_encounter(board[coords.i], line)
+            if line["ally"] == 3 or line["ennemy"] == 3:
                 return True
-            row = True
-            x += 1
-        column = True
-        x = 0
-        while x < 3:
-            i = x
-            y = 0
-            while y < 3 and column:
-                if self.board[i] != self.player:
-                    column = False
-                y += 1
-                i += 3
-            if column:
-                return True
-            column = True
-            x += 1
-        if self.board[4] == self.player:
-            if self.board[0] == self.player and self.board[8] == self.player:
-                return True
-            if self.board[2] == self.player and self.board[6] == self.player:
-                return True
+            line["ally"] = 0
+            line["ennemy"] = 0
         return False
+
+
+    @staticmethod
+    def check_diagonal_lines_win(self, board, axe):
+        line = {"ally": 0, "ennemy": 0}
+        coords = Coords()
+        if axe == "up":
+            check_range = range(3)
+        else:
+            check_range = range(2, -1, -1)
+        for i in check_range:
+            coords.set(x=i, y=i)
+            self.manage_encounter(board[coords.i], line)
+        if line["ally"] == 3 or line["ennemy"] == 3:
+            return True
+        return False
+
+
+    def check_win(self):
+        if self.check_straight_lines_win(self, self.board, "x"):
+            return True
+        if self.check_straight_lines_win(self, self.board, "y"):
+            return True
+        if self.check_diagonal_lines_win(self, self.board, "up"):
+            return True
+        if self.check_diagonal_lines_win(self, self.board, "down"):
+            return True
+        return False
+
 
     def print_board(self):
         print(f"Plateau :\n")
@@ -47,7 +74,12 @@ class Morpion:
                 print(f"[{self.board[y * 3 + x]}] ", end="")
             print("\n")
 
+    def get_turn(self):
+        return self.player
+
     def get_board(self):
+        if self.player == 'W' or self.player == 'D':
+            self.init_board()
         return self.board
 
     def init_board(self):
@@ -57,6 +89,15 @@ class Morpion:
             self.board.append(f"{i}")
         self.previous_board.append(self.board.copy())
         return self.board
+
+
+    @staticmethod
+    def check_draw(gameboard):
+        for slot in gameboard:
+            if isdigit(slot):
+                return False
+        return True
+
 
     def play_morpion(self, move):
         if move < 0 or move > len(self.board):
@@ -68,6 +109,9 @@ class Morpion:
             return False
         if self.check_win():
             self.player = 'W'
+            return True
+        if self.check_draw(board):
+            self.player = 'D'
             return True
         if self.player == 'X':
             self.player = 'O'
