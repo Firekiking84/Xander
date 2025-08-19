@@ -35,6 +35,8 @@ class Game:
         return env
 
 
+    # Check pour chaque joueur l'interval de temps entre deux fonctions du joueur et des autres
+    # Renvoie la plus grosse interval
     @staticmethod
     def get_nb_actions_per_turn(parsed_file):
         intervales = {}
@@ -42,12 +44,14 @@ class Game:
             i = 0
             while i < len(player.functions_used):
                 intervale = 0
-                while i < len(player.functions_used) and (player.functions_used[i].time + 1) != player.functions_used[i + 1].time:
+                while i < (len(player.functions_used) - 1) and (player.functions_used[i].time + 1) != player.functions_used[i + 1].time:
                     intervale += 1
+                    i += 1
                 if intervales.get(intervale) is not None:
                     intervales[intervale] += 1
                 else:
                     intervales[intervale] = 0
+                i += 1
         biggest_score = 0
         best_intervale = 0
         for key in intervales.keys():

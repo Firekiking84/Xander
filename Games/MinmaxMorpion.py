@@ -1,12 +1,11 @@
 import time
 from curses.ascii import isdigit
-from logging import debug
 
 from Games.Coords import Coords
 from Games.Morpion import Morpion
 
 
-def manage_encounter(slot, line, turn):
+def manage_encounter(slot: str, line: dict, turn: str):
     if not isdigit(slot):
         if slot == turn:
             line["ally"] += 1
@@ -14,7 +13,7 @@ def manage_encounter(slot, line, turn):
             line["ennemy"] += 1
 
 
-def calcul_score(line, coefs):
+def calcul_score(line: dict, coefs: dict):
     score = 0
     if line["ally"] == 0 and line["ennemy"] == 0:
         score += 1 * coefs["close"]
@@ -26,7 +25,7 @@ def calcul_score(line, coefs):
         score += 500
     return score
 
-def check_line(turn, board, coords, axe, coefs):
+def check_line(turn: str, board: list, coords: Coords, axe, coefs):
     if axe == "up" or axe == "down":
         # On vérifie que la diagonale est possible
         if (coords.x == 1 and (coords.y == 0 or coords.y == 2)) or (coords.y == 1 and (coords.x == 0 or coords.x == 2)):
@@ -48,12 +47,12 @@ def check_line(turn, board, coords, axe, coefs):
         elif axe == "up":
             coords.set(x=i, y=i)
         else:
-            coords.set(x=2-i, y=i)
+            coords.set(x=2 - i, y=i)
         manage_encounter(board[coords.i], line, turn)
     return calcul_score(line, coefs)
 
 
-def get_score_from_long_range(scored_board):
+def get_score_from_long_range(scored_board: list):
     best_score = -1000
     nb_best = 0 # si plusieurs meilleurs résultats
     for slot in scored_board:
@@ -65,10 +64,10 @@ def get_score_from_long_range(scored_board):
     return best_score + nb_best
 
 
-def simulate_next_moves(turn, board, coords, scored_board, coefs):
+def simulate_next_moves(turn: str, board: list, coords: Coords, scored_board: list, coefs: dict):
     board[coords.i] = turn
     new_game = Morpion()
-    if new_game.set_board(board):
+    if new_game.set_game_state(board):
         scored_board[coords.i] += 100000
         return # Coup gagnant
     turn_value = -1 # Détermine si ce sont des points gagné ou perdu. Adversaire fait perdre
@@ -77,9 +76,9 @@ def simulate_next_moves(turn, board, coords, scored_board, coefs):
     turn = new_game.get_turn()
     tmp_score = 0
     while n_turn < 3 and not new_game.check_win() and turn != 'D':
-        define_board_score(new_game.get_turn(), new_game.get_board(), tmp_scored_board, new_game.nb_turn)
+        define_board_score(new_game.get_turn(), new_game.get_game_state(), tmp_scored_board, new_game.nb_turn)
         tmp_score += get_score_from_long_range(tmp_scored_board) * turn_value * coefs["longRange"]
-        new_game.play_morpion(get_first_best_move(scored_board))
+        new_game.play(get_first_best_move(scored_board))
         new_game.get_turn()
         turn_value *= -1
         n_turn += 1
@@ -90,7 +89,7 @@ def simulate_next_moves(turn, board, coords, scored_board, coefs):
     scored_board[coords.i] += tmp_score
 
 
-def define_slot_score(turn, board, coords, scored_board, coefs, nb_turn):
+def define_slot_score(turn: str, board: list, coords: Coords, scored_board: list, coefs: dict, nb_turn: int):
     if isdigit(board[coords.i]):
         scored_board[coords.i] += check_line(turn, board, coords.copy(), "x", coefs)
         scored_board[coords.i] += check_line(turn, board, coords.copy(), "y", coefs)
@@ -101,7 +100,7 @@ def define_slot_score(turn, board, coords, scored_board, coefs, nb_turn):
     else:
         scored_board[coords.i] = -1
 
-def define_board_score(turn, board, scored_board, nb_turn):
+def define_board_score(turn: str, board: list, scored_board: list, nb_turn: int):
     coords = Coords()
     coefs = {"close": 2, "block": 4, "end": 3, "longRange": 2, "endLongRange": 100}
     for index in range(len(board)):
@@ -115,7 +114,7 @@ def new_scored_board():
     return scored_board
 
 
-def get_first_best_move(scored_board):
+def get_first_best_move(scored_board: list):
     best_score = -1
     best_index = 0
     for index in range(len(scored_board)):
@@ -126,14 +125,14 @@ def get_first_best_move(scored_board):
     return best_index
 
 
-def minmax_morpion_play(game):
+def minmax_morpion_play(game: Morpion):
     turn = game.get_turn()
-    board = game.get_board()
+    board = game.get_game_state()
     scored_board = new_scored_board()
     nb_turn = game.nb_turn
     define_board_score(turn, board, scored_board, nb_turn)
     print(scored_board)
-    if type(game.play_morpion(get_first_best_move(scored_board))) == type(True):
+    if type(game.play(get_first_best_move(scored_board))) == type(True):
         return turn
     else:
         return None

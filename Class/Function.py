@@ -1,4 +1,5 @@
 from Class.FunctionEnum import FunctionKind
+from Class.Variable import Variable
 
 
 class Function:
@@ -6,7 +7,7 @@ class Function:
         if parameters is None:
             parameters = []
         self.name = name
-        self.return_value = return_value
+        self.return_value: Variable | None = return_value
         self.parameters = parameters
         self.time = time
         self.operations = operations

@@ -11,7 +11,7 @@ class Player:
             return_str += str(function) + '\n'
         return return_str
 
-    def get_time_function(self, time):
+    def get_function_time(self, time):
         for i in range(len(self.functions_used)):
             if self.functions_used[i].time == time:
                 return i

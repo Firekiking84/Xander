@@ -57,7 +57,7 @@ class ParseExample:
         elif len(word) > 0 and is_size and has_kind:
             return kind, self.check_size(word)
         else:
-            raise Exception("Error in the example file ! Maybe type is missing !")
+            raise Exception(f"Error in the example file ! Maybe type is missing ! At line : {line}")
 
     def parse_line(self, line, mode):
         word = ""
@@ -69,12 +69,12 @@ class ParseExample:
         function_parameters = []
         i = 0
         while i < len(line) and line[i] != '#':
-            if line[i] == ' ':
+            if line[i] == ' ' or line[i] == '\n':
                 if is_function:
                     if has_return_value:
                         function_return_value = self.variables[-1]
                     else:
-                        function_return_value = None
+                        function_return_value = Variable()
                     new_function = Function(function_name, function_return_value, function_parameters, function_time)
                     if mode == -2:
                         self.init_functions.append(new_function)
@@ -90,6 +90,8 @@ class ParseExample:
                     self.variables.append(Variable(kind, size, word))
                     has_return_value = True
                 while line[i] == ' ' or line[i] == '=':
+                    i += 1
+                if line[i] == '\n':
                     i += 1
                 word = ""
             elif line[i] == '(':

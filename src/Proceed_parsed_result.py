@@ -23,6 +23,7 @@ def get_output_value(output_lines, index):
         split_line = line.split(" ", 2)
         if (int(split_line[0])) == index:
             return ast.literal_eval(split_line[2])
+    return None
 
 
 def test_operation_single_target_index(prev, next_value, input_function, operation):
@@ -185,7 +186,7 @@ def get_next_prev_value(next_prev_value, input_function, output_functions, outpu
             return False
         var_name = output_function.return_value.name
         next_prev_value["variable"] = output_function.return_value
-        next_prev_value["next"] = get_output_value(output_functions, output_function.time)
+        next_prev_value["next"] = get_output_value(output_lines, output_function.time)
         next_prev_value["prev"] = get_prev_value(output_functions, input_function, var_name, output_lines)
     next_prev_value["n_var"] += 1
     return True
@@ -235,9 +236,9 @@ def define_function_operation(parsed_file, output_file):
     for input_function in input_functions:
         is_operation_find = False
         next_prev_value = {"n_var": 0, "next": None, "prev": None, "variable": None}
-        while not get_next_prev_value(next_prev_value, input_function, output_functions, output_lines):
+        while get_next_prev_value(next_prev_value, input_function, output_functions, output_lines):
             # Maintenant qu'on a avant après. On teste les différentes possibilités d'interaction
-            # Possibilités d'interactions codés en dur. Pas forcément ouf pour la suite
+            # Possibilités d'interactions codé en dur. Pas forcément ouf pour la suite
             operation = Operation(variable=next_prev_value["variable"])
             if type(next_prev_value["prev"]) == type([]) and len(input_function.parameters) == 1:
                 is_operation_find = test_operation_single_target_index(next_prev_value["prev"], next_prev_value["next"], input_function, operation)
@@ -262,10 +263,10 @@ def define_function_operation(parsed_file, output_file):
 
 
 def proceed_parsed_result(parsed_file):
-    pool_test = "output/poolTest.py"
+    pool_test = "../output/poolTest.py"
     output_file = "output.txt"
     ScriptRebuilding(parsed_file, pool_test, output_file)
-    subprocess.run(["python", pool_test])
+    subprocess.run(["python3", pool_test])
     define_function_operation(parsed_file, output_file)
     game = Game()
     game.build_from_parsed_file(parsed_file)

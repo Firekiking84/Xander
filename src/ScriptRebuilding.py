@@ -14,7 +14,7 @@ class ScriptRebuilding:
         find = False
         start_research = self.current_player
         while not find:
-            function_index = self.parsed_file.players[self.current_player].get_time_function(self.time)
+            function_index = self.parsed_file.players[self.current_player].get_function_time(self.time)
             if function_index == -1:
                 self.next_player()
                 if self.current_player == start_research:

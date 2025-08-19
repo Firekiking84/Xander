@@ -17,3 +17,4 @@ class FunctionOperation(Enum):
     QUANTITY_SET = 5
     QUANTITY_RM = 6
     QUANTITY_ADD = 7
+    CHECK_VICTORY = 8

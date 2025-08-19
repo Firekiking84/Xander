@@ -3,7 +3,7 @@ from Proceed_parsed_result import proceed_parsed_result
 from src.Build_player import build_player
 
 
-def learner(example_file, player_name):
+def learner(example_file: str, player_name: str):
     parsed_file = ParseExample(example_file)
     if len(parsed_file.players) == 0:
         raise Exception("Error in the example file ! No player detected !")
@@ -11,4 +11,5 @@ def learner(example_file, player_name):
     build_player(game, player_name)
 
 
-learner("res/exampleMorpion.py", "morpionPlayer")
+learner("../res/exampleMorpion.py", "jumperPlayer")
+print("End")
