@@ -1,16 +1,15 @@
-from Class.FunctionEnum import FunctionKind
-from Class.Variable import Variable
+from old.Class.FunctionEnum import FunctionKind
+from old.Class.Variable import Variable
 
 
 class Function:
-    def __init__(self, name="", return_value=None, parameters=None, time=0, kind=None, operations=[]):
+    def __init__(self, name="", return_value=None, parameters=None, time=0, kind=None):
         if parameters is None:
             parameters = []
         self.name = name
         self.return_value: Variable | None = return_value
         self.parameters = parameters
         self.time = time
-        self.operations = operations
         if kind is not None:
             self.kind = kind
         else:

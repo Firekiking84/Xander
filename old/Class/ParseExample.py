@@ -1,5 +1,3 @@
-import os
-
 from old.Class.Function import Function
 from old.Class.Player import Player
 from old.Class.Variable import Variable
@@ -8,7 +6,7 @@ from old.Class.Variable import Variable
 class ParseExample:
 
     @staticmethod
-    def check_kind(word: str):
+    def check_kind(word):
         if "array" in word:
             return "array"
         elif "string" in word:
@@ -25,20 +23,19 @@ class ParseExample:
             raise Exception(f"Error in the example file ! Unknow Type only 'array', 'string' and 'integer' not {word}")
 
     @staticmethod
-    def check_size(word: str):
+    def check_size(word):
         word = word.strip()
         if word.isdigit():
             return int(word)
         else:
             raise Exception("Size must be an integer !")
 
-    def get_var_spe(self, line: str):
+    def get_var_spe(self, line):
         word = ""
         size = 1
         is_kind = False
         has_kind = False
         is_size = False
-        kind = None
         i = 0
         while i < len(line):
             if line[i] == '#':
@@ -51,8 +48,6 @@ class ParseExample:
                 has_kind = True
                 word = ""
             elif is_size and line[i] == ' ' and len(word) > 0:
-                if not kind:
-                    raise Exception(f"Error in the example file ! Type might be missing at line : {line}")
                 return kind, self.check_size(word)
             elif is_kind or is_size:
                 word += line[i]
@@ -64,7 +59,7 @@ class ParseExample:
         else:
             raise Exception(f"Error in the example file ! Maybe type is missing ! At line : {line}")
 
-    def __parse_line(self, line: str, mode: int | str):
+    def parse_line(self, line, mode):
         word = ""
         is_function = False
         has_return_value = False
@@ -122,7 +117,15 @@ class ParseExample:
                 word += line[i]
                 i += 1
 
-    def parse(self, example_file:str):
+    def __init__(self, example_file):
+        self.imports = []
+        self.variables = []
+        self.init_functions = []
+        self.back_function = None
+        self.players = {}
+        self.players_name = []
+        self.winner = ""
+        self.time = 0  # for chronology of calls during game
         # mode values -> -1: include; -2: init; x>0: n°x player
         mode = -1
         example = open(example_file, 'r')
@@ -145,35 +148,9 @@ class ParseExample:
                     if mode == -1:
                         self.imports.append(line)
                     elif mode <= -2:
-                        self.__parse_line(line, mode)
+                        self.parse_line(line, mode)
                 else:
                     if mode not in self.players:
                         self.players[mode] = Player(mode)
                         self.players_name.append(mode)
-                    self.__parse_line(line, mode)
-
-    def learn(self, pool_test_path: str = "../output/poolTest.py", output_file: str = "output.txt"):
-        if len(self.players_name) == 0:
-            raise Exception(f"Cannot learn without player parsed !")
-        self.current_player = self.players_name[0]
-        self.time = 0
-        file = open(pool_test, "w+")
-        for line in self.imports:
-            file.write(line)
-        file.write
-
-
-
-
-    def __init__(self, example_file: str | None = None, ):
-        self.imports = []
-        self.variables = []
-        self.init_functions = []
-        self.back_function = None
-        self.current_player = None
-        self.players = {}
-        self.players_name = []
-        self.winner = ""
-        self.time = 0  # for chronology of calls during game
-        if (example_file is not None) and os.path.isfile(example_file):
-            self.__parse_line(example_file, 0)
+                    self.parse_line(line, mode)
